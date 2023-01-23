@@ -87,6 +87,7 @@ ERRDEF(IOSTDCL,	"standard file is closed")
 ERRDEF(OSUNIQF,	"unable to generate a unique filename")
 ERRDEF(OSDATEF,	"field " LUA_QS " missing in date table")
 ERRDEF(STRDUMP,	"unable to dump given function")
+ERRDEF(STRDUMPDISABLED,	"dumping of bytecode has been disabled")
 ERRDEF(STRSLC,	"string slice too long")
 ERRDEF(STRPATB,	"missing " LUA_QL("[") " after " LUA_QL("%f") " in pattern")
 ERRDEF(STRPATC,	"invalid pattern capture")
@@ -146,6 +147,7 @@ ERRDEF(XGSCOPE,	"<goto %s> jumps into the scope of local " LUA_QS)
 /* Bytecode reader errors. */
 ERRDEF(BCFMT,	"cannot load incompatible bytecode")
 ERRDEF(BCBAD,	"cannot load malformed bytecode")
+ERRDEF(BCDISABLED,	"loading of bytecode has been disabled")
 
 #if LJ_HASFFI
 /* FFI errors. */

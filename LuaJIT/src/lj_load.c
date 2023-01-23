@@ -23,22 +23,24 @@
 #include "lj_bcdump.h"
 #include "lj_parse.h"
 
-/* -- Load Lua source code and bytecode ----------------------------------- */
+/* -- Load Lua source code ----------------------------------- */
 
 static TValue *cpparser(lua_State *L, lua_CFunction dummy, void *ud)
 {
   LexState *ls = (LexState *)ud;
   GCproto *pt;
   GCfunc *fn;
-  int bc;
   UNUSED(dummy);
   cframe_errfunc(L->cframe) = -1;  /* Inherit error function. */
-  bc = lj_lex_setup(L, ls);
-  if (ls->mode && !strchr(ls->mode, bc ? 'b' : 't')) {
+  if (lj_lex_setup(L, ls)) {
+    setstrV(L, L->top++, lj_err_str(L, LJ_ERR_BCDISABLED));
+    lj_err_throw(L, LUA_ERRSYNTAX);
+  }
+  if (ls->mode && !strchr(ls->mode, 't')) {
     setstrV(L, L->top++, lj_err_str(L, LJ_ERR_XMODE));
     lj_err_throw(L, LUA_ERRSYNTAX);
   }
-  pt = bc ? lj_bcread(ls) : lj_parse(ls);
+  pt = lj_parse(ls);
   fn = lj_func_newL_empty(L, pt, tabref(L->env));
   /* Don't combine above/below into one statement. */
   setfuncV(L, L->top++, fn);
