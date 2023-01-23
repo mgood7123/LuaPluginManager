@@ -38,21 +38,28 @@
 
 static void ll_unloadlib(void *lib)
 {
-  dlclose(lib);
+  UNUSED(lib);
+//  dlclose(lib);
 }
 
 static void *ll_load(lua_State *L, const char *path, int gl)
 {
-  void *lib = dlopen(path, RTLD_NOW | (gl ? RTLD_GLOBAL : RTLD_LOCAL));
-  if (lib == NULL) lua_pushstring(L, dlerror());
-  return lib;
+  UNUSED(path); UNUSED(gl);
+  lua_pushliteral(L, "ability to load native libraries has been disabled");
+  return NULL;
+  // void *lib = dlopen(path, RTLD_NOW | (gl ? RTLD_GLOBAL : RTLD_LOCAL));
+  // if (lib == NULL) lua_pushstring(L, dlerror());
+  // return lib;
 }
 
 static lua_CFunction ll_sym(lua_State *L, void *lib, const char *sym)
 {
-  lua_CFunction f = (lua_CFunction)dlsym(lib, sym);
-  if (f == NULL) lua_pushstring(L, dlerror());
-  return f;
+  UNUSED(lib); UNUSED(sym);
+  lua_pushliteral(L, "ability to search for symbols inside native libraries has been disabled");
+  return NULL;
+  // lua_CFunction f = (lua_CFunction)dlsym(lib, sym);
+  // if (f == NULL) lua_pushstring(L, dlerror());
+  // return f;
 }
 
 static const char *ll_bcsym(void *lib, const char *sym)
@@ -128,22 +135,29 @@ static void pusherror(lua_State *L)
 
 static void ll_unloadlib(void *lib)
 {
-  FreeLibrary((HINSTANCE)lib);
+  UNUSED(lib);
+//  FreeLibrary((HINSTANCE)lib);
 }
 
 static void *ll_load(lua_State *L, const char *path, int gl)
 {
-  HINSTANCE lib = LJ_WIN_LOADLIBA(path);
-  if (lib == NULL) pusherror(L);
-  UNUSED(gl);
-  return lib;
+  UNUSED(path); UNUSED(gl);
+  lua_pushliteral(L, "ability to load native libraries has been disabled");
+  return NULL;
+  // HINSTANCE lib = LJ_WIN_LOADLIBA(path);
+  // if (lib == NULL) pusherror(L);
+  // UNUSED(gl);
+  // return lib;
 }
 
 static lua_CFunction ll_sym(lua_State *L, void *lib, const char *sym)
 {
-  lua_CFunction f = (lua_CFunction)GetProcAddress((HINSTANCE)lib, sym);
-  if (f == NULL) pusherror(L);
-  return f;
+  UNUSED(lib); UNUSED(sym);
+  lua_pushliteral(L, "ability to search for symbols inside native libraries has been disabled");
+  return NULL;
+  // lua_CFunction f = (lua_CFunction)GetProcAddress((HINSTANCE)lib, sym);
+  // if (f == NULL) pusherror(L);
+  // return f;
 }
 
 #if LJ_TARGET_UWP

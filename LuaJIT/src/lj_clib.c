@@ -115,32 +115,39 @@ static const char *clib_resolve_lds(lua_State *L, const char *name)
 
 static void *clib_loadlib(lua_State *L, const char *name, int global)
 {
-  void *h = dlopen(clib_extname(L, name),
-		   RTLD_LAZY | (global?RTLD_GLOBAL:RTLD_LOCAL));
-  if (!h) {
-    const char *e, *err = dlerror();
-    if (err && *err == '/' && (e = strchr(err, ':')) &&
-	(name = clib_resolve_lds(L, strdata(lj_str_new(L, err, e-err))))) {
-      h = dlopen(name, RTLD_LAZY | (global?RTLD_GLOBAL:RTLD_LOCAL));
-      if (h) return h;
-      err = dlerror();
-    }
-    if (!err) err = "dlopen failed";
-    lj_err_callermsg(L, err);
-  }
-  return h;
+  lj_err_callermsg(L, "ability to load native libraries has been disabled");
+  UNUSED(name); UNUSED(global);
+  return NULL;
+  // void *h = dlopen(clib_extname(L, name),
+	// 	   RTLD_LAZY | (global?RTLD_GLOBAL:RTLD_LOCAL));
+  // if (!h) {
+  //   const char *e, *err = dlerror();
+  //   if (err && *err == '/' && (e = strchr(err, ':')) &&
+	// (name = clib_resolve_lds(L, strdata(lj_str_new(L, err, e-err))))) {
+  //     h = dlopen(name, RTLD_LAZY | (global?RTLD_GLOBAL:RTLD_LOCAL));
+  //     if (h) return h;
+  //     err = dlerror();
+  //   }
+  //   if (!err) err = "dlopen failed";
+  //   lj_err_callermsg(L, err);
+  // }
+  // return h;
 }
 
 static void clib_unloadlib(CLibrary *cl)
 {
-  if (cl->handle && cl->handle != CLIB_DEFHANDLE)
-    dlclose(cl->handle);
+  UNUSED(cl);
+  // if (cl->handle && cl->handle != CLIB_DEFHANDLE)
+  //   dlclose(cl->handle);
 }
 
-static void *clib_getsym(CLibrary *cl, const char *name)
+static void *clib_getsym(lua_State *L, CLibrary *cl, const char *name)
 {
-  void *p = dlsym(cl->handle, name);
-  return p;
+  lj_err_callermsg(L, "ability to search for symbols inside native libraries has been disabled");
+  UNUSED(cl); UNUSED(name);
+  return NULL;
+  // void *p = dlsym(cl->handle, name);
+  // return p;
 }
 
 #elif LJ_TARGET_WINDOWS
@@ -210,72 +217,79 @@ static const char *clib_extname(lua_State *L, const char *name)
 
 static void *clib_loadlib(lua_State *L, const char *name, int global)
 {
-  DWORD oldwerr = GetLastError();
-  void *h = LJ_WIN_LOADLIBA(clib_extname(L, name));
-  if (!h) clib_error(L, "cannot load module " LUA_QS ": %s", name);
-  SetLastError(oldwerr);
-  UNUSED(global);
-  return h;
+  lj_err_callermsg(L, "ability to load native libraries has been disabled");
+  UNUSED(name); UNUSED(global);
+  return NULL;
+  // DWORD oldwerr = GetLastError();
+  // void *h = LJ_WIN_LOADLIBA(clib_extname(L, name));
+  // if (!h) clib_error(L, "cannot load module " LUA_QS ": %s", name);
+  // SetLastError(oldwerr);
+  // UNUSED(global);
+  // return h;
 }
 
 static void clib_unloadlib(CLibrary *cl)
 {
-  if (cl->handle == CLIB_DEFHANDLE) {
-#if !LJ_TARGET_UWP
-    MSize i;
-    for (i = CLIB_HANDLE_KERNEL32; i < CLIB_HANDLE_MAX; i++) {
-      void *h = clib_def_handle[i];
-      if (h) {
-	clib_def_handle[i] = NULL;
-	FreeLibrary((HINSTANCE)h);
-      }
-    }
-#endif
-  } else if (cl->handle) {
-    FreeLibrary((HINSTANCE)cl->handle);
-  }
+  UNUSED(cl);
+//   if (cl->handle == CLIB_DEFHANDLE) {
+// #if !LJ_TARGET_UWP
+//     MSize i;
+//     for (i = CLIB_HANDLE_KERNEL32; i < CLIB_HANDLE_MAX; i++) {
+//       void *h = clib_def_handle[i];
+//       if (h) {
+// 	clib_def_handle[i] = NULL;
+// 	FreeLibrary((HINSTANCE)h);
+//       }
+//     }
+// #endif
+//   } else if (cl->handle) {
+//     FreeLibrary((HINSTANCE)cl->handle);
+//   }
 }
 
 #if LJ_TARGET_UWP
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #endif
 
-static void *clib_getsym(CLibrary *cl, const char *name)
+static void *clib_getsym(lua_State *L, CLibrary *cl, const char *name)
 {
-  void *p = NULL;
-  if (cl->handle == CLIB_DEFHANDLE) {  /* Search default libraries. */
-    MSize i;
-    for (i = 0; i < CLIB_HANDLE_MAX; i++) {
-      HINSTANCE h = (HINSTANCE)clib_def_handle[i];
-      if (!(void *)h) {  /* Resolve default library handles (once). */
-#if LJ_TARGET_UWP
-	h = (HINSTANCE)&__ImageBase;
-#else
-	switch (i) {
-	case CLIB_HANDLE_EXE: GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, NULL, &h); break;
-	case CLIB_HANDLE_DLL:
-	  GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			     (const char *)clib_def_handle, &h);
-	  break;
-	case CLIB_HANDLE_CRT:
-	  GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-			     (const char *)&_fmode, &h);
-	  break;
-	case CLIB_HANDLE_KERNEL32: h = LJ_WIN_LOADLIBA("kernel32.dll"); break;
-	case CLIB_HANDLE_USER32: h = LJ_WIN_LOADLIBA("user32.dll"); break;
-	case CLIB_HANDLE_GDI32: h = LJ_WIN_LOADLIBA("gdi32.dll"); break;
-	}
-	if (!h) continue;
-#endif
-	clib_def_handle[i] = (void *)h;
-      }
-      p = (void *)GetProcAddress(h, name);
-      if (p) break;
-    }
-  } else {
-    p = (void *)GetProcAddress((HINSTANCE)cl->handle, name);
-  }
-  return p;
+  lj_err_callermsg(L, "ability to search for symbols inside native libraries has been disabled");
+  UNUSED(cl); UNUSED(name);
+  return NULL;
+//   void *p = NULL;
+//   if (cl->handle == CLIB_DEFHANDLE) {  /* Search default libraries. */
+//     MSize i;
+//     for (i = 0; i < CLIB_HANDLE_MAX; i++) {
+//       HINSTANCE h = (HINSTANCE)clib_def_handle[i];
+//       if (!(void *)h) {  /* Resolve default library handles (once). */
+// #if LJ_TARGET_UWP
+// 	h = (HINSTANCE)&__ImageBase;
+// #else
+// 	switch (i) {
+// 	case CLIB_HANDLE_EXE: GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, NULL, &h); break;
+// 	case CLIB_HANDLE_DLL:
+// 	  GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+// 			     (const char *)clib_def_handle, &h);
+// 	  break;
+// 	case CLIB_HANDLE_CRT:
+// 	  GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+// 			     (const char *)&_fmode, &h);
+// 	  break;
+// 	case CLIB_HANDLE_KERNEL32: h = LJ_WIN_LOADLIBA("kernel32.dll"); break;
+// 	case CLIB_HANDLE_USER32: h = LJ_WIN_LOADLIBA("user32.dll"); break;
+// 	case CLIB_HANDLE_GDI32: h = LJ_WIN_LOADLIBA("gdi32.dll"); break;
+// 	}
+// 	if (!h) continue;
+// #endif
+// 	clib_def_handle[i] = (void *)h;
+//       }
+//       p = (void *)GetProcAddress(h, name);
+//       if (p) break;
+//     }
+//   } else {
+//     p = (void *)GetProcAddress((HINSTANCE)cl->handle, name);
+//   }
+//   return p;
 }
 
 #else
@@ -300,7 +314,7 @@ static void clib_unloadlib(CLibrary *cl)
   UNUSED(cl);
 }
 
-static void *clib_getsym(CLibrary *cl, const char *name)
+static void *clib_getsym(lua_State *L, CLibrary *cl, const char *name)
 {
   UNUSED(cl); UNUSED(name);
   return NULL;
@@ -361,7 +375,7 @@ TValue *lj_clib_index(lua_State *L, CLibrary *cl, GCstr *name)
 #if LJ_TARGET_WINDOWS
       DWORD oldwerr = GetLastError();
 #endif
-      void *p = clib_getsym(cl, sym);
+      void *p = clib_getsym(L, cl, sym);
       GCcdata *cd;
       lj_assertCTS(ctype_isfunc(ct->info) || ctype_isextern(ct->info),
 		   "unexpected ctype %08x in clib", ct->info);
@@ -375,7 +389,7 @@ TValue *lj_clib_index(lua_State *L, CLibrary *cl, GCstr *name)
 			       cconv == CTCC_FASTCALL ? "@%s@%d" : "_%s@%d",
 			       sym, sz);
 	  L->top--;
-	  p = clib_getsym(cl, symd);
+	  p = clib_getsym(L, cl, symd);
 	}
       }
 #endif
