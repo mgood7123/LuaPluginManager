@@ -196,8 +196,6 @@ ERRDEF(BUFFER_LEFTOV,	"left-over data in buffer")
 #endif
 
 ERRDEF(EXEDISABLED,	"os.execute has been disabled")
-ERRDEF(COCREATEDISABLED,	"coroutine creation has been disabled")
-ERRDEF(COWRAPDISABLED,	"coroutine wrapping has been disabled")
 ERRDEF(JITNOOFF,	"JIT compiler cannot be turned off")
 ERRDEF(EXITDISABLED,	"os.exit has been disabled")
 
