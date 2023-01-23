@@ -50,10 +50,10 @@ typedef unsigned int uintptr_t;
 #define LJ_MAX_MEM64	((uint64_t)1<<47)  /* Max. 64 bit memory allocation. */
 /* Max. total memory allocation. */
 #define LJ_MAX_MEM	(LJ_GC64 ? LJ_MAX_MEM64 : LJ_MAX_MEM32)
-#define LJ_MAX_ALLOC	LJ_MAX_MEM	/* Max. individual allocation length. */
-#define LJ_MAX_STR	LJ_MAX_MEM32	/* Max. string length. */
-#define LJ_MAX_BUF	LJ_MAX_MEM32	/* Max. buffer length. */
-#define LJ_MAX_UDATA	LJ_MAX_MEM32	/* Max. userdata length. */
+#define LJ_MAX_ALLOC	(2 << (18-1))	/* Max. individual allocation length. */
+#define LJ_MAX_STR	(2 << (18-1))	/* Max. string length. */
+#define LJ_MAX_BUF	(2 << (18-1))	/* Max. buffer length. */
+#define LJ_MAX_UDATA	(2 << (18-1))	/* Max. userdata length. */
 
 #define LJ_MAX_STRTAB	(1<<26)		/* Max. string table size. */
 #define LJ_MAX_HBITS	26		/* Max. hash bits. */

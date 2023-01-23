@@ -314,6 +314,10 @@ static GCstr *lj_str_alloc(lua_State *L, const char *str, MSize len,
 GCstr *lj_str_new(lua_State *L, const char *str, size_t lenx)
 {
   global_State *g = G(L);
+  if (lenx == LJ_MAX_STR) {
+    lj_err_mem(L);
+    return &g->strempty;
+  }
   if (lenx-1 < LJ_MAX_STR-1) {
     MSize len = (MSize)lenx;
     StrHash hash = hash_sparse(g->str.seed, str, len);
