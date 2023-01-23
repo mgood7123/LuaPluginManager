@@ -592,12 +592,14 @@ LJLIB_CF(coroutine_isyieldable)
 
 LJLIB_CF(coroutine_create)
 {
-  lua_State *L1;
-  if (!(L->base < L->top && tvisfunc(L->base)))
-    lj_err_argt(L, 1, LUA_TFUNCTION);
-  L1 = lua_newthread(L);
-  setfuncV(L, L1->top++, funcV(L->base));
+  lj_err_caller(L, LJ_ERR_COCREATEDISABLED);
   return 1;
+  // lua_State *L1;
+  // if (!(L->base < L->top && tvisfunc(L->base)))
+  //   lj_err_argt(L, 1, LUA_TFUNCTION);
+  // L1 = lua_newthread(L);
+  // setfuncV(L, L1->top++, funcV(L->base));
+  // return 1;
 }
 
 LJLIB_ASM(coroutine_yield)
@@ -654,11 +656,13 @@ static void setpc_wrap_aux(lua_State *L, GCfunc *fn);
 
 LJLIB_CF(coroutine_wrap)
 {
-  GCfunc *fn;
-  lj_cf_coroutine_create(L);
-  fn = lj_lib_pushcc(L, lj_ffh_coroutine_wrap_aux, FF_coroutine_wrap_aux, 1);
-  setpc_wrap_aux(L, fn);
+  lj_err_caller(L, LJ_ERR_COWRAPDISABLED);
   return 1;
+  // GCfunc *fn;
+  // lj_cf_coroutine_create(L);
+  // fn = lj_lib_pushcc(L, lj_ffh_coroutine_wrap_aux, FF_coroutine_wrap_aux, 1);
+  // setpc_wrap_aux(L, fn);
+  // return 1;
 }
 
 #include "lj_libdef.h"

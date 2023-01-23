@@ -42,6 +42,10 @@
 
 static int setjitmode(lua_State *L, int mode)
 {
+  if (mode == LUAJIT_MODE_OFF) {
+    lj_err_caller(L, LJ_ERR_JITNOOFF);
+    return 1;
+  }
   int idx = 0;
   if (L->base == L->top || tvisnil(L->base)) {  /* jit.on/off/flush([nil]) */
     mode |= LUAJIT_MODE_ENGINE;
