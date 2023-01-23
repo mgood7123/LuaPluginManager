@@ -791,9 +791,11 @@ LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
   if (skipcomment(&lf, &c))  /* read initial portion */
     lf.buff[lf.n++] = '\n';  /* add line to correct line numbers */
   if (c == LUA_SIGNATURE[0] && filename) {  /* binary file? */
-    lf.f = freopen(filename, "rb", lf.f);  /* reopen in binary mode */
-    if (lf.f == NULL) return errfile(L, "reopen", fnameindex);
-    skipcomment(&lf, &c);  /* re-read initial portion */
+    // do not load pre-compiled lua chunks
+    const char *filename = lua_tostring(L, fnameindex) + 1;
+    lua_pushfstring(L, "binary files are not allowed: %s", filename);
+    lua_remove(L, fnameindex);
+    return LUA_ERRFILE;
   }
   if (c != EOF)
     lf.buff[lf.n++] = c;  /* 'c' is the first character of the stream */

@@ -154,10 +154,17 @@ static int str_rep (lua_State *L) {
   const char *sep = luaL_optlstring(L, 3, "", &lsep);
   if (n <= 0)
     lua_pushliteral(L, "");
+
   else if (l_unlikely(l + lsep < l || l + lsep > MAXSIZE / n))
     return luaL_error(L, "resulting string too large");
   else {
     size_t totallen = (size_t)n * l + (size_t)(n - 1) * lsep;
+
+    // dont allocate any strings larger than 2^18 bytes
+    if (l_unlikely(totallen >= 2 << (18-1))) {
+      return luaL_error(L, "resulting string too large");
+    }
+
     luaL_Buffer b;
     char *p = luaL_buffinitsize(L, &b, totallen);
     while (n-- > 1) {  /* first n-1 copies (followed by separator) */
@@ -1830,7 +1837,11 @@ static int str_unpack (lua_State *L) {
 static const luaL_Reg strlib[] = {
   {"byte", str_byte},
   {"char", str_char},
-  {"dump", str_dump},
+  
+  // dump can be used to output precompiled lua chunk
+  //
+  //{"dump", str_dump},
+  
   {"find", str_find},
   {"format", str_format},
   {"gmatch", gmatch},

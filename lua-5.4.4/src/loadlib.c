@@ -689,7 +689,10 @@ static int ll_require (lua_State *L) {
 
 
 static const luaL_Reg pk_funcs[] = {
-  {"loadlib", ll_loadlib},
+  // a plugin could load and execute a maliciously packed machine-code library
+  //
+  //{"loadlib", ll_loadlib},
+
   {"searchpath", ll_searchpath},
   /* placeholders */
   {"preload", NULL},
@@ -702,7 +705,9 @@ static const luaL_Reg pk_funcs[] = {
 
 
 static const luaL_Reg ll_funcs[] = {
-  {"require", ll_require},
+  // a plugin could load and execute a maliciously packed machine-code library
+  //
+  //{"require", ll_require},
   {NULL, NULL}
 };
 

@@ -51,22 +51,23 @@
 #define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
 #endif
 
+// dont allow possibility of native library loading for plugins
 
 #if defined(LUA_USE_WINDOWS)
-#define LUA_DL_DLL	/* enable support for DLL */
+//#define LUA_DL_DLL	/* enable support for DLL */
 #define LUA_USE_C89	/* broadly, Windows is C89 */
 #endif
 
 
 #if defined(LUA_USE_LINUX)
 #define LUA_USE_POSIX
-#define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
+//#define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
 #endif
 
 
 #if defined(LUA_USE_MACOSX)
 #define LUA_USE_POSIX
-#define LUA_USE_DLOPEN		/* MacOS does not need -ldl */
+//#define LUA_USE_DLOPEN		/* MacOS does not need -ldl */
 #endif
 
 

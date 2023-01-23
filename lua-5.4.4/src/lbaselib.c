@@ -510,8 +510,21 @@ static const luaL_Reg base_funcs[] = {
   {"error", luaB_error},
   {"getmetatable", luaB_getmetatable},
   {"ipairs", luaB_ipairs},
+
+  // a plugin could use loadfile to execute malicous code
+  // - io.open("tmp.lua", "wb"):write(string.dump(function() print("hello") end)):close(); loadfile("tmp.lua")()
+  //
+  // we disable loadfile's ability to detect lua bytecode chunks in order to protect against this
+  //
   {"loadfile", luaB_loadfile},
+
+  // a plugin could use load to execute malicious code
+  //   - https://github.com/saelo/33c3ctf-repl (currently fails to execute in lua 5.4 but might succeed in lower versions)
+  //
+  // we disable load's ability to detect lua bytecode chunks in order to protect against this
+  //
   {"load", luaB_load},
+
   {"next", luaB_next},
   {"pairs", luaB_pairs},
   {"pcall", luaB_pcall},
@@ -522,7 +535,11 @@ static const luaL_Reg base_funcs[] = {
   {"rawget", luaB_rawget},
   {"rawset", luaB_rawset},
   {"select", luaB_select},
-  {"setmetatable", luaB_setmetatable},
+
+  // setmetatable could be exploited
+  //
+  //{"setmetatable", luaB_setmetatable},
+
   {"tonumber", luaB_tonumber},
   {"tostring", luaB_tostring},
   {"type", luaB_type},

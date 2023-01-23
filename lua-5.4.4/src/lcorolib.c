@@ -190,11 +190,21 @@ static int luaB_close (lua_State *L) {
 
 
 static const luaL_Reg co_funcs[] = {
-  {"create", luaB_cocreate},
+  // create and wrap seem to be exploitable
+  //  - https://github.com/erezto/lua-sandbox-escape/blob/master/x86_64/exploit.lua
+  //  - https://gist.github.com/corsix/6575486
+  //
+  //{"create", luaB_cocreate},
+  
   {"resume", luaB_coresume},
   {"running", luaB_corunning},
   {"status", luaB_costatus},
-  {"wrap", luaB_cowrap},
+  // create and wrap seem to be exploitable
+  //  - https://github.com/erezto/lua-sandbox-escape/blob/master/x86_64/exploit.lua
+  //  - https://gist.github.com/corsix/6575486
+  //
+  //{"wrap", luaB_cowrap},
+
   {"yield", luaB_yield},
   {"isyieldable", luaB_yieldable},
   {"close", luaB_close},
