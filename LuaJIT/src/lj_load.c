@@ -33,8 +33,8 @@ static TValue *cpparser(lua_State *L, lua_CFunction dummy, void *ud)
   UNUSED(dummy);
   cframe_errfunc(L->cframe) = -1;  /* Inherit error function. */
   if (lj_lex_setup(L, ls)) {
-    setstrV(L, L->top++, lj_err_str(L, LJ_ERR_BCDISABLED));
-    lj_err_throw(L, LUA_ERRSYNTAX);
+    lj_err_caller(L, LJ_ERR_BCDISABLED);
+    return NULL;
   }
   if (ls->mode && !strchr(ls->mode, 't')) {
     setstrV(L, L->top++, lj_err_str(L, LJ_ERR_XMODE));
