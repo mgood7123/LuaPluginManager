@@ -113,15 +113,17 @@ LJLIB_CF(os_getenv)
 
 LJLIB_CF(os_exit)
 {
-  int status;
-  if (L->base < L->top && tvisbool(L->base))
-    status = boolV(L->base) ? EXIT_SUCCESS : EXIT_FAILURE;
-  else
-    status = lj_lib_optint(L, 1, EXIT_SUCCESS);
-  if (L->base+1 < L->top && tvistruecond(L->base+1))
-    lua_close(L);
-  //exit(status);
-  return 0;  /* Unreachable. */
+  lj_err_caller(L, LJ_ERR_EXITDISABLED);
+  return 1;
+  // int status;
+  // if (L->base < L->top && tvisbool(L->base))
+  //   status = boolV(L->base) ? EXIT_SUCCESS : EXIT_FAILURE;
+  // else
+  //   status = lj_lib_optint(L, 1, EXIT_SUCCESS);
+  // if (L->base+1 < L->top && tvistruecond(L->base+1))
+  //   lua_close(L);
+  // exit(status);
+  // return 0;  /* Unreachable. */
 }
 
 LJLIB_CF(os_clock)
